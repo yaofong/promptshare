@@ -13,13 +13,18 @@
 <!-- Navigation -->
 <nav class="nav">
     <div class="container nav__inner">
-        <a href="#" class="nav__logo">PromptShare</a>
+        <a href="#browse" class="nav__logo">PromptShare</a>
         <div class="nav__links">
-            <a href="#browse">Browse</a>
+            <a href="#browse" id="navBrowse">Browse</a>
             <a href="#submit">Submit</a>
         </div>
     </div>
 </nav>
+
+<!-- ============================================ -->
+<!-- VIEW: Home / Browse                           -->
+<!-- ============================================ -->
+<div id="viewBrowse" class="view">
 
 <!-- Hero -->
 <section class="hero">
@@ -108,6 +113,21 @@
         </div>
     </div>
 </section>
+</div>
+
+<!-- ============================================ -->
+<!-- VIEW: Prompt Detail                          -->
+<!-- ============================================ -->
+<div id="viewDetail" class="view view--hidden">
+    <section class="section detail">
+        <div class="container">
+            <a href="#browse" class="detail__back">← Back to Browse</a>
+            <div class="detail__card" id="detailContent">
+                <!-- populated by JS -->
+            </div>
+        </div>
+    </section>
+</div>
 
 <!-- Footer -->
 <footer class="footer">

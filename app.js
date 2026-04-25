@@ -11,6 +11,9 @@ const formSuccess = document.getElementById('formSuccess');
 const grid = document.getElementById('promptGrid');
 const searchInput = document.getElementById('searchInput');
 const filterSelect = document.getElementById('filterCategory');
+const viewBrowse = document.getElementById('viewBrowse');
+const viewDetail = document.getElementById('viewDetail');
+const detailContent = document.getElementById('detailContent');
 
 // ---- Load from localStorage ----
 function loadPrompts() {
@@ -38,8 +41,106 @@ function formatDate(ts) {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-// ---- Render cards ----
-function render() {
+// ---- Esc HTML ----
+function escHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ---- Category helpers ----
+function getCategoryEmoji(cat) {
+  const map = {
+    coding: '💻', writing: '✍️', creative: '🎨',
+    business: '💼', education: '📚', productivity: '⚡',
+    fun: '🎮', other: '📌'
+  };
+  return map[cat] || '📌';
+}
+
+// ---- Toast ----
+function showToast(msg) {
+  let toast = document.querySelector('.toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.className = 'toast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.classList.add('toast--visible');
+  clearTimeout(toast._timeout);
+  toast._timeout = setTimeout(() => toast.classList.remove('toast--visible'), 2500);
+}
+
+// ==========================================
+//  ROUTING
+// ==========================================
+
+function navigate() {
+  const hash = location.hash || '#browse';
+
+  // Detail route: #/prompt/ID
+  const detailMatch = hash.match(/^#\/prompt\/(.+)$/);
+  if (detailMatch) {
+    const id = detailMatch[1];
+    const prompt = prompts.find(p => p.id === id);
+    if (prompt) {
+      showDetail(prompt);
+      return;
+    }
+    // If not found, fall back to browse
+    location.hash = '#browse';
+    return;
+  }
+
+  // Default: show browse view
+  showBrowse();
+}
+
+function showBrowse() {
+  viewDetail.classList.add('view--hidden');
+  viewBrowse.classList.remove('view--hidden');
+  document.title = 'PromptShare — Share Prompts Publicly';
+  renderGrid();
+  // Scroll to browse section if hash is #browse
+  if (location.hash === '#browse') {
+    setTimeout(() => {
+      document.getElementById('browse')?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  }
+}
+
+function showDetail(prompt) {
+  viewBrowse.classList.add('view--hidden');
+  viewDetail.classList.remove('view--hidden');
+  document.title = `${escHtml(prompt.title)} — PromptShare`;
+
+  detailContent.innerHTML = `
+    <div class="detail__header">
+      <h1 class="detail__title">${escHtml(prompt.title)}</h1>
+      <div class="detail__meta">
+        <span class="detail__meta-item">👤 ${escHtml(prompt.author || 'Anonymous')}</span>
+        <span class="detail__meta-item">📅 ${formatDate(prompt.createdAt)}</span>
+        <span class="detail__category">${getCategoryEmoji(prompt.category)} ${prompt.category}</span>
+      </div>
+    </div>
+    ${prompt.description ? `<p class="detail__description">${escHtml(prompt.description)}</p>` : ''}
+    <div class="detail__content">${escHtml(prompt.content)}</div>
+    <div class="detail__actions">
+      <button class="btn btn--primary" onclick="copyDetail()">📋 Copy Prompt</button>
+      <button class="btn btn--secondary" onclick="shareDetail()">🔗 Share Link</button>
+    </div>
+  `;
+
+  // Scroll to top of detail
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ==========================================
+//  RENDER GRID (browse view)
+// ==========================================
+
+function renderGrid() {
   const query = searchInput.value.toLowerCase().trim();
   const cat = filterSelect.value;
 
@@ -71,60 +172,38 @@ function render() {
   filtered.sort((a, b) => b.createdAt - a.createdAt);
 
   grid.innerHTML = filtered.map(p => `
-    <div class="prompt-card" data-id="${p.id}">
+    <div class="prompt-card" onclick="openDetail('${p.id}')">
       <div class="prompt-card__header">
         <h3 class="prompt-card__title">${escHtml(p.title)}</h3>
         <span class="prompt-card__category">${getCategoryEmoji(p.category)} ${p.category}</span>
       </div>
       ${p.description ? `<p class="prompt-card__desc">${escHtml(p.description)}</p>` : ''}
-      <div class="prompt-card__content" id="content-${p.id}">${escHtml(p.content)}</div>
+      <div class="prompt-card__content">${escHtml(p.content)}</div>
       <div class="prompt-card__footer">
         <div class="prompt-card__meta">
-          <span>By ${p.author || 'Anonymous'}</span>
+          <span>By ${escHtml(p.author || 'Anonymous')}</span>
           <span>${formatDate(p.createdAt)}</span>
-        </div>
-        <div class="prompt-card__actions">
-          <button class="prompt-card__action" onclick="toggleExpand('${p.id}')">📖 Expand</button>
-          <button class="prompt-card__action" onclick="copyPrompt('${p.id}')">📋 Copy</button>
         </div>
       </div>
     </div>
   `).join('');
 }
 
-// ---- Helpers ----
-function escHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
+// ==========================================
+//  NAVIGATION HELPERS
+// ==========================================
+
+function openDetail(id) {
+  location.hash = `#/prompt/${id}`;
 }
 
-function getCategoryEmoji(cat) {
-  const map = {
-    coding: '💻', writing: '✍️', creative: '🎨',
-    business: '💼', education: '📚', productivity: '⚡',
-    fun: '🎮', other: '📌'
-  };
-  return map[cat] || '📌';
-}
-
-// ---- Toggle expand ----
-function toggleExpand(id) {
-  const el = document.getElementById(`content-${id}`);
-  if (!el) return;
-  el.classList.toggle('prompt-card__content--expanded');
-  const btn = el.closest('.prompt-card').querySelector('.prompt-card__action:first-child');
-  btn.textContent = el.classList.contains('prompt-card__content--expanded') ? '🔺 Collapse' : '📖 Expand';
-}
-
-// ---- Copy ----
-function copyPrompt(id) {
+function copyDetail() {
+  const id = location.hash.match(/^#\/prompt\/(.+)$/)[1];
   const p = prompts.find(x => x.id === id);
   if (!p) return;
   navigator.clipboard.writeText(p.content).then(() => {
     showToast('📋 Copied to clipboard!');
   }).catch(() => {
-    // Fallback
     const ta = document.createElement('textarea');
     ta.value = p.content;
     document.body.appendChild(ta);
@@ -135,21 +214,19 @@ function copyPrompt(id) {
   });
 }
 
-// ---- Toast ----
-function showToast(msg) {
-  let toast = document.querySelector('.toast');
-  if (!toast) {
-    toast = document.createElement('div');
-    toast.className = 'toast';
-    document.body.appendChild(toast);
-  }
-  toast.textContent = msg;
-  toast.classList.add('toast--visible');
-  clearTimeout(toast._timeout);
-  toast._timeout = setTimeout(() => toast.classList.remove('toast--visible'), 2500);
+function shareDetail() {
+  const url = window.location.href;
+  navigator.clipboard.writeText(url).then(() => {
+    showToast('🔗 Link copied! Share it anywhere.');
+  }).catch(() => {
+    showToast(`🔗 ${url}`);
+  });
 }
 
-// ---- Form submit ----
+// ==========================================
+//  FORM SUBMIT
+// ==========================================
+
 form.addEventListener('submit', (e) => {
   e.preventDefault();
 
@@ -178,24 +255,24 @@ form.addEventListener('submit', (e) => {
   form.style.display = 'none';
   formSuccess.style.display = 'block';
 
-  render();
+  renderGrid();
   showToast('🌟 Prompt shared successfully!');
-
-  // Scroll to browse
-  document.getElementById('browse').scrollIntoView({ behavior: 'smooth' });
 });
 
-// ---- Reset form after sharing ----
-document.querySelector('.form__success').addEventListener('click', () => {
+// Reset form after sharing
+formSuccess.addEventListener('click', () => {
   form.reset();
   form.style.display = 'block';
   formSuccess.style.display = 'none';
 });
 
 // ---- Filter events ----
-searchInput.addEventListener('input', render);
-filterSelect.addEventListener('change', render);
+searchInput.addEventListener('input', renderGrid);
+filterSelect.addEventListener('change', renderGrid);
+
+// ---- Listen for hash changes ----
+window.addEventListener('hashchange', navigate);
 
 // ---- Init ----
 loadPrompts();
-render();
+navigate();
