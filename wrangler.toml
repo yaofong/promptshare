@@ -11,5 +11,5 @@ html_handling = "auto-trailing-slash"
 # KV storage for prompts
 [[kv_namespaces]]
 binding = "PROMPTSHARE_KV"
-id = "promptshare-kv"
-preview_id = "promptshare-kv-preview"
+id = "4a9b6a1673c44c8c87705f888c72f9dc"
+preview_id = "4a9b6a1673c44c8c87705f888c72f9dc"
