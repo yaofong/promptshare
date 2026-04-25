@@ -1,46 +1,56 @@
 # PromptShare
 
-A simple, beautiful website for sharing AI prompts publicly.
+A public prompt-sharing website — **anyone on the internet can see and share prompts**.
 
-## Features
+## 🆕 Now with Backend API!
 
-- 📝 Submit prompts with title, category, and content
-- 🔍 Search and filter prompts by category
-- 📋 One-click copy to clipboard
-- 🌙 Dark theme, modern design
-- 💾 Data stored in your browser (no backend needed)
+Prompts are stored on the server, not just your browser. Everyone sees the same prompts.
 
-## How to Deploy
+## Quick Deploy
 
-### Option 1: GitHub Pages (Free, Recommended)
+### Option 1: Render (Free, recommended)
 
-1. Create a repo on GitHub
-2. Push these files to the repo
-3. Go to **Settings → Pages** → select `main` branch
-4. Your site is live at `https://yourusername.github.io/repo-name`
+1. Push this repo to GitHub
+2. Go to [render.com](https://render.com) → **New Web Service**
+3. Connect your GitHub repo
+4. Set:
+   - **Build Command**: `npm install`
+   - **Start Command**: `node server.js`
+5. Click **Deploy**
+6. Your site is live at `https://your-app.onrender.com`
 
-### Option 2: Netlify (Drag & Drop)
-
-1. Go to [netlify.com](https://netlify.com)
-2. Drag this folder onto the deploy area
-3. Done — instant URL
-
-### Option 3: Vercel
-
-1. Go to [vercel.com](https://vercel.com)
-2. Import this project
-3. Deploy
-
-## Local Preview
+### Option 2: Fly.io
 
 ```bash
-python3 -m http.server 8080
-# Open http://localhost:8080
+fly launch
+fly deploy
 ```
 
-## Tech
+### Option 3: Railway
 
-- Pure HTML + CSS + JavaScript
-- No frameworks, no dependencies
-- localStorage for data persistence
-- Works fully offline
+1. Push to GitHub
+2. Go to [railway.app](https://railway.app)
+3. Deploy from GitHub repo
+
+## Local Development
+
+```bash
+npm install
+node server.js
+# Open http://localhost:3000
+```
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/prompts` | List all prompts |
+| `GET` | `/api/prompts/:id` | Get single prompt |
+| `POST` | `/api/prompts` | Create a prompt |
+
+## Tech Stack
+
+- **Frontend**: HTML + CSS + Vanilla JS
+- **Backend**: Node.js + Express
+- **Storage**: JSON file
+- **Hosting**: Any Node.js host (Render, Fly.io, Railway)
