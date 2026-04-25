@@ -6,7 +6,7 @@
 // ---- Config ----
 const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? `http://${window.location.hostname}:${window.location.port || 3000}`
-  : ''; // Same origin in production
+  : 'https://promptshare.yaofong.workers.dev'; // Shared backend on Cloudflare Workers
 
 const STORAGE_KEY = 'promptshare_prompts';
 const CACHE_KEY = 'promptshare_cache';
