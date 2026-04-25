@@ -23,11 +23,35 @@ app.use('/api/*', cors())
 async function listPrompts(env) {
   const raw = await env.PROMPTSHARE_KV.get('prompts:index')
   if (!raw) return []
+  
+  let index
   try {
-    return JSON.parse(raw)
+    index = JSON.parse(raw)
   } catch {
     return []
   }
+
+  // Backfill: if any entry is missing content, fetch from full prompt key
+  let needsSave = false
+  await Promise.all(index.map(async (entry) => {
+    if (!entry.content) {
+      const full = await env.PROMPTSHARE_KV.get(`prompt:${entry.id}`)
+      if (full) {
+        try {
+          const parsed = JSON.parse(full)
+          entry.content = parsed.content || ''
+          needsSave = true
+        } catch {}
+      }
+    }
+  }))
+
+  // Save the backfilled index
+  if (needsSave) {
+    await env.PROMPTSHARE_KV.put('prompts:index', JSON.stringify(index))
+  }
+
+  return index
 }
 
 async function getPrompt(env, id) {
@@ -51,6 +75,7 @@ async function addPrompt(env, prompt) {
     title: prompt.title,
     category: prompt.category,
     author: prompt.author,
+    content: prompt.content,
     description: prompt.description,
     createdAt: prompt.createdAt,
   })
