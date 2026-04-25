@@ -506,6 +506,22 @@ body {
 }
 
 /* -------------------------------
+   Storage Badge
+   ------------------------------- */
+
+.storage-badge {
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  padding: 8px 0 16px;
+}
+
+.storage-badge--active {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* -------------------------------
    Toast
    ------------------------------- */
 

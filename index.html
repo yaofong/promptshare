@@ -77,9 +77,7 @@
             <button type="submit" class="btn btn--primary btn--full">Share Prompt 🌟</button>
         </form>
         <div id="formSuccess" class="form__success" style="display:none;">
-            <div class="form__success-icon">✅</div>
-            <h3>Prompt Shared Successfully!</h3>
-            <p>Your prompt is now live for everyone to see.</p>
+            <!-- populated by JS -->
         </div>
     </div>
 </section>
@@ -104,6 +102,8 @@
                 <option value="other">📌 Other</option>
             </select>
         </div>
+
+        <div id="storageStatus" class="storage-badge">No prompts yet</div>
 
         <div id="promptGrid" class="prompt-grid">
             <div class="prompt-grid__empty">
