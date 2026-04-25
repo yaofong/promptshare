@@ -1,0 +1,15 @@
+name = "promptshare"
+main = "worker.js"
+compatibility_date = "2025-04-25"
+
+# Static assets served automatically (no worker code needed)
+[assets]
+directory = "./public"
+# Serve index.html for directory paths
+html_handling = "auto-trailing-slash"
+
+# KV storage for prompts
+[[kv_namespaces]]
+binding = "PROMPTSHARE_KV"
+id = "promptshare-kv"
+preview_id = "promptshare-kv-preview"

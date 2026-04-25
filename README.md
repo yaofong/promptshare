@@ -2,55 +2,72 @@
 
 A public prompt-sharing website — **anyone on the internet can see and share prompts**.
 
-## 🆕 Now with Backend API!
+Powered by **Cloudflare Workers + KV** for global, always-on, zero-cost hosting.
 
-Prompts are stored on the server, not just your browser. Everyone sees the same prompts.
-
-## Quick Deploy
-
-### Option 1: Render (Free, recommended)
-
-1. Push this repo to GitHub
-2. Go to [render.com](https://render.com) → **New Web Service**
-3. Connect your GitHub repo
-4. Set:
-   - **Build Command**: `npm install`
-   - **Start Command**: `node server.js`
-5. Click **Deploy**
-6. Your site is live at `https://your-app.onrender.com`
-
-### Option 2: Fly.io
-
-```bash
-fly launch
-fly deploy
-```
-
-### Option 3: Railway
-
-1. Push to GitHub
-2. Go to [railway.app](https://railway.app)
-3. Deploy from GitHub repo
-
-## Local Development
+## 🚀 One-Command Deploy
 
 ```bash
 npm install
-node server.js
-# Open http://localhost:3000
+npx wrangler deploy
 ```
 
-## API Endpoints
+That's it. Your site goes live at `https://promptshare.<your-subdomain>.workers.dev`.
+
+### Prerequisites
+
+1. A [Cloudflare account](https://dash.cloudflare.com/sign-up) (free)
+2. Create a KV namespace:
+   ```bash
+   npx wrangler kv:namespace create PROMPTSHARE_KV
+   ```
+3. Copy the `id` from the output and paste it into `wrangler.toml`:
+   ```toml
+   [[kv_namespaces]]
+   binding = "PROMPTSHARE_KV"
+   id = "YOUR_PRODUCTION_ID"
+   ```
+
+## 🏃 Local Development
+
+```bash
+npm install
+npx wrangler dev
+# Open http://localhost:8787
+```
+
+## 📡 API
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/api/prompts` | List all prompts |
-| `GET` | `/api/prompts/:id` | Get single prompt |
+| `GET` | `/api/prompts` | List all prompts (lightweight, no content) |
+| `GET` | `/api/prompts/:id` | Get single prompt (full content) |
 | `POST` | `/api/prompts` | Create a prompt |
 
-## Tech Stack
+### POST body
 
-- **Frontend**: HTML + CSS + Vanilla JS
-- **Backend**: Node.js + Express
-- **Storage**: JSON file
-- **Hosting**: Any Node.js host (Render, Fly.io, Railway)
+```json
+{
+  "title": "Code Review Assistant",
+  "category": "coding",
+  "author": "Jane",
+  "content": "You are a senior code reviewer...",
+  "description": "Reviews pull requests"
+}
+```
+
+## 🏗️ Architecture
+
+```
+Browser → Cloudflare Worker (Hono)
+            ├── /api/*      → KV (persistent storage)
+            └── /*          → Static assets (HTML/CSS/JS)
+```
+
+- **Hono** — lightweight web framework for Workers
+- **Workers KV** — globally distributed key-value storage
+- **Static assets** — served by wrangler `[assets]` config
+- **Free tier**: 100K req/day, 1GB KV storage — more than enough
+
+## 💰 Cost
+
+**$0/month** on Cloudflare's free tier for any reasonable usage.

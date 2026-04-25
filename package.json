@@ -1,14 +1,18 @@
 {
   "name": "promptshare",
-  "version": "2.0.0",
-  "description": "A public prompt-sharing website with backend API",
-  "main": "server.js",
+  "version": "3.0.0",
+  "description": "Public prompt-sharing website — Cloudflare Worker + KV",
+  "private": true,
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "kv:create": "wrangler kv:namespace create PROMPTSHARE_KV",
+    "kv:preview": "wrangler kv:namespace create PROMPTSHARE_KV --preview"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "cors": "^2.8.5"
+    "hono": "^4.6.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.85.0"
   }
 }
