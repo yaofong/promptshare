@@ -458,4 +458,4 @@ if (filterSelect) filterSelect.addEventListener('change', renderGrid);
 window.addEventListener('hashchange', navigate);
 
 // ---- Init ----
-loadPrompts();
+loadPrompts().then(() => navigate());
